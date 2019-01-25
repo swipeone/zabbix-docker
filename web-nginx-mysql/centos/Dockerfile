@@ -59,13 +59,13 @@ STOPSIGNAL SIGTERM
 COPY --from=builder /tmp/zabbix/ /usr/share/zabbix/
 
 RUN groupadd --system zabbix && \
-    adduser -r --shell /sbin/nologin \
+    adduser -r \
             -g zabbix \
             -d /var/lib/zabbix/ \
         zabbix && \
     mkdir -p /etc/zabbix && \
     mkdir -p /etc/zabbix/web && \
-    chown --quiet -R zabbix:root /etc/zabbix && \
+    chown --quiet -R zabbix:zabbix /etc/zabbix && \
     yum ${YUM_FLAGS_COMMON} makecache && \
     yum ${YUM_FLAGS_PERSISTENT} install epel-release && \
     yum ${YUM_FLAGS_PERSISTENT} install \
@@ -90,6 +90,7 @@ RUN groupadd --system zabbix && \
     chown --quiet -R nginx:nginx /var/lib/php/ && \
     yum ${YUM_FLAGS_PERSISTENT} clean all && \
     rm -rf /var/cache/yum/
+    
 
 EXPOSE 80/TCP 443/TCP
 
@@ -101,9 +102,14 @@ COPY ["conf/etc/supervisor/", "/etc/supervisor/"]
 COPY ["conf/etc/zabbix/nginx.conf", "/etc/zabbix/"]
 COPY ["conf/etc/zabbix/nginx_ssl.conf", "/etc/zabbix/"]
 COPY ["conf/etc/zabbix/web/zabbix.conf.php", "/etc/zabbix/web/"]
-COPY ["conf/etc/nginx/nginx.conf", "/etc/nginx/conf.d/"]
+COPY ["conf/etc/nginx/nginx.conf", "/etc/nginx/"]
 COPY ["conf/etc/php-fpm.conf", "/etc/php-fpm.conf"]
 COPY ["conf/etc/php.d/99-zabbix.ini", "/etc/php.d/99-zabbix.ini"]
 COPY ["docker-entrypoint.sh", "/usr/bin/"]
 
+RUN chown --quiet -R nginx:nginx /etc/nginx/
+
+USER zabbix
+
 ENTRYPOINT ["docker-entrypoint.sh"]
+
