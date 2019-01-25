@@ -65,7 +65,7 @@ RUN groupadd --system zabbix && \
         zabbix && \
     mkdir -p /etc/zabbix && \
     mkdir -p /etc/zabbix/web && \
-    chown --quiet -R zabbix:zabbix /etc/zabbix && \
+    chown --quiet -R zabbix:root /etc/zabbix && \
     yum ${YUM_FLAGS_COMMON} makecache && \
     yum ${YUM_FLAGS_PERSISTENT} install epel-release && \
     yum ${YUM_FLAGS_PERSISTENT} install \
@@ -108,8 +108,6 @@ COPY ["conf/etc/php.d/99-zabbix.ini", "/etc/php.d/99-zabbix.ini"]
 COPY ["docker-entrypoint.sh", "/usr/bin/"]
 
 RUN chown --quiet -R nginx:nginx /etc/nginx/
-
-USER zabbix
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
